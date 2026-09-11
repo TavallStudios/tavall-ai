@@ -1,4 +1,4 @@
-version: 2
+version: 3
 entrypoint: tavall-skill-orchestrator
 policy:
   unknown_skill: discover_before_fallback
@@ -8,6 +8,8 @@ policy:
   installed_skill_precedence: runtime_over_stale_registry
   memory_on_tavall_prompt: route_when_available
   diff_completion: exact_head_local_ci
+  tavall_engineering_policy: automatic
+  documentation_resolution: exact_selective_current_main
 
 discovery:
   sources:
@@ -42,9 +44,44 @@ skills:
     role: foundation
     routes: [git, repository, branch, commit, pull_request, staging, reconciliation, promotion]
     canonical_policy:
-      repository: TavallStudios/tavall-project-novus
+      repository: TavallStudios/tavall-docs
+      ref: main
       path: docs/quality/GIT_WORKFLOW.md
     missing_behavior: blocked_for_policy_decisions
+
+  - id: tavall-documentation-context
+    kind: skill
+    identity: exact_current
+    role: foundation
+    routes: [documentation_context, document_lookup, policy_lookup, docs_lookup, exact_document_routing]
+    invocation: on_demand_for_governed_concern
+    canonical_routing:
+      repository: TavallStudios/tavall-docs
+      ref: main
+      path: docs/quality/DOCUMENT_ROUTING.yml
+    source:
+      repository: TavallStudios/tavall-ai
+      path: plugins/tavall-ai/skills/tavall-documentation-context/SKILL.md
+    missing_behavior: targeted_current_document_search_without_recursive_preload
+
+  - id: tavall-engineering-policy
+    kind: skill
+    identity: exact_current
+    role: foundation
+    routes: [coding, implementation, debugging, refactoring, testing, review, build_logic, configuration, infrastructure_code, runtime_behavior, architecture]
+    invocation: automatic_for_tavall_engineering
+    requires: [tavall-documentation-context]
+    canonical_routing:
+      repository: TavallStudios/tavall-docs
+      ref: main
+      path: docs/quality/DOCUMENT_ROUTING.yml
+    canonical_tests:
+      repository: TavallStudios/Tavall-Architecture-Tests
+      paths: [AGENTS.md, README.md, manifest/sources.json, repositories]
+    source:
+      repository: TavallStudios/tavall-ai
+      path: plugins/tavall-ai/skills/tavall-engineering-policy/SKILL.md
+    missing_behavior: degraded_to_selective_direct_canonical_resolution
 
   - id: tavall-ai
     kind: skill
@@ -87,7 +124,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [implementation, coding, bounded_acceptance_unit]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-engineering-policy]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-implementation/SKILL.md
@@ -97,7 +134,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [review, code_review, independent_review]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-engineering-policy]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-review/SKILL.md
@@ -127,7 +164,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [architecture, architecture_migration, structural_repair]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-engineering-policy]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-architecture/SKILL.md
@@ -137,7 +174,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [documentation, technical_docs, evidence_documentation]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-documentation-context]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-documentation/SKILL.md
