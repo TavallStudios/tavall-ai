@@ -174,3 +174,112 @@ val verifyTavallAISystem = tasks.register("verifyTavallAISystem") {
 tasks.named("check") {
     dependsOn(verifyTavallAISystem)
 }
+
+val verifySkillOrchestration = tasks.register("verifySkillOrchestration") {
+    group = "verification"
+    description = "Verifies Tavall skill routing, canonical policy sources, and engineering-policy activation contracts."
+
+    doLast {
+        fun requiredText(path: String): String {
+            val source = file(path)
+            check(source.isFile) { "Missing required skill-orchestration source: $path" }
+            return source.readText()
+        }
+
+        val engineeringPolicyPath = "plugins/tavall-ai/skills/tavall-engineering-policy/SKILL.md"
+        val engineeringPolicy = requiredText(engineeringPolicyPath)
+        val policyRouting = requiredText("plugins/tavall-ai/skills/tavall-engineering-policy/references/policy-routing.md")
+        val registry = requiredText("plugins/tavall-skill-orchestrator/registry.yaml")
+        val orchestrator = requiredText("plugins/tavall-skill-orchestrator/SKILL.md")
+        val orchestratorAgent = requiredText("plugins/tavall-skill-orchestrator/agents/openai.yaml")
+        val pluginMetadata = requiredText("plugins/tavall-ai/.codex-plugin/plugin.json")
+        val bundle = requiredText("skill-orchestration/bundle.yaml")
+        val gitSkill = requiredText("plugins/tavall-git-workflow/SKILL.md")
+        val gitPolicyPointer = requiredText("plugins/tavall-git-workflow/references/canonical-policy.md")
+
+        check(engineeringPolicy.contains("name: tavall-engineering-policy")) {
+            "$engineeringPolicyPath must expose the canonical skill identity"
+        }
+        check(engineeringPolicy.contains("Natural-language requests are enough")) {
+            "$engineeringPolicyPath must explicitly support natural-language Tavall engineering activation"
+        }
+        check(engineeringPolicy.contains("TavallStudios/tavall-docs")) {
+            "$engineeringPolicyPath must resolve shared policy from tavall-docs"
+        }
+        check(engineeringPolicy.contains("TavallStudios/Tavall-Architecture-Tests")) {
+            "$engineeringPolicyPath must resolve canonical architecture-test coverage"
+        }
+        check(engineeringPolicy.contains("NO_DIRECT_CANONICAL_TEST")) {
+            "$engineeringPolicyPath must preserve missing direct architecture-test coverage as evidence"
+        }
+        check(engineeringPolicy.contains("Explicit external-adoption mode")) {
+            "$engineeringPolicyPath must keep non-Tavall adoption explicit"
+        }
+        check(policyRouting.contains("Concern-to-source hints")) {
+            "Engineering-policy routing reference must preserve concern-based source discovery"
+        }
+
+        check(registry.contains("id: tavall-engineering-policy")) {
+            "Skill registry must expose tavall-engineering-policy"
+        }
+        check(registry.contains("invocation: automatic_for_tavall_engineering")) {
+            "Skill registry must auto-route Tavall engineering work"
+        }
+        check(registry.contains("external_invocation: explicit_only")) {
+            "Skill registry must not auto-apply Tavall policy to external projects"
+        }
+        check(registry.contains("infrastructure_code")) {
+            "Skill registry must route infrastructure-code changes through Tavall engineering policy"
+        }
+        check(bundle.contains("- tavall-engineering-policy")) {
+            "Skill bundle must integrate tavall-engineering-policy"
+        }
+        check(orchestrator.contains("automatically require `tavall-engineering-policy`")) {
+            "Orchestrator must automatically select Tavall engineering policy for natural coding work"
+        }
+        check(orchestratorAgent.contains("automatically require \$tavall-engineering-policy")) {
+            "Installed orchestrator prompt must auto-select Tavall engineering policy"
+        }
+        check(pluginMetadata.contains("tavall-engineering-policy")) {
+            "Tavall AI plugin metadata must advertise engineering-policy resolution"
+        }
+
+        listOf(
+            "plugins/tavall-ai/skills/tavall-agent-implementation/SKILL.md",
+            "plugins/tavall-ai/skills/tavall-agent-review/SKILL.md",
+            "plugins/tavall-ai/skills/tavall-agent-architecture/SKILL.md",
+            "plugins/tavall-ai/skills/tavall-agent-orchestration/SKILL.md",
+            "plugins/tavall-ai/skills/tavall-ai/SKILL.md",
+        ).forEach { path ->
+            check(requiredText(path).contains("tavall-engineering-policy")) {
+                "$path must route material Tavall engineering decisions through tavall-engineering-policy"
+            }
+        }
+
+        val expectedGitPolicyRepository = "TavallStudios/tavall-docs"
+        val staleGitPolicyRepository = "TavallStudios/tavall-project-novus"
+        check(gitSkill.contains(expectedGitPolicyRepository) && gitPolicyPointer.contains(expectedGitPolicyRepository)) {
+            "Git workflow skill and pointer must use tavall-docs as shared authority"
+        }
+        check(!gitSkill.contains(staleGitPolicyRepository) && !gitPolicyPointer.contains(staleGitPolicyRepository)) {
+            "Git workflow skill still points at the retired Project Novus policy location"
+        }
+
+        val skillIdentities = fileTree("plugins") {
+            include("**/SKILL.md")
+        }.files.mapNotNull { skillFile ->
+            skillFile.useLines { lines ->
+                lines.firstOrNull { it.startsWith("name: ") }?.removePrefix("name: ")?.trim()
+            }?.let { identity -> identity to skillFile }
+        }
+        val duplicates = skillIdentities.groupBy({ it.first }, { it.second })
+            .filterValues { it.size > 1 }
+        check(duplicates.isEmpty()) {
+            "Duplicate Tavall skill identities detected: " + duplicates.keys.joinToString(", ")
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn(verifySkillOrchestration)
+}

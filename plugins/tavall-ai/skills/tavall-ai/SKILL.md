@@ -22,6 +22,7 @@ Agents are not AIs. The parent Tavall AI runtime performs model execution with t
 
 ## Routing
 
+- For Tavall coding, debugging, refactoring, testing, review, build/configuration, infrastructure-code, runtime-behavior, or architecture work, resolve the current `tavall-engineering-policy` first. Natural-language requests are enough; the caller does not need to name that skill.
 - For substantive repository work, start with `tavall-agent-orchestration`.
 - Use the specialized `tavall-agent-*` skills for their acceptance-unit responsibilities.
 - Use `tavall-agent-scheduler` only for distributed worker/top-level-session placement or recovery.
@@ -42,6 +43,6 @@ Tavall Cloud determines DEVELOPMENT eligibility, durable job authority, workspac
 
 ## Repository work
 
-Use current production code and architecture as the source of truth. Mutation agents must commit and push meaningful checkpoints so another authorized worker can resume from Git after session or machine loss.
+Use current production code and architecture as evidence under the policy set resolved by `tavall-engineering-policy`; do not substitute remembered Tavall conventions for current `tavall-docs`, canonical architecture tests, or stricter repository-local rules. Mutation agents must commit and push meaningful checkpoints so another authorized worker can resume from Git after session or machine loss.
 
 Use repository-owned local CI against the exact head before review-ready handoff. GitHub may display resulting status/evidence, but hosted workflow YAML is not the source of Tavall build logic.

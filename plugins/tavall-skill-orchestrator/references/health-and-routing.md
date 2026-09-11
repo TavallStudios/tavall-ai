@@ -5,7 +5,7 @@
 For each Tavall request:
 
 1. Build a candidate route from prompt intent and current repository/runtime context.
-2. Add cross-cutting foundations: memory when available, Git policy when repository/PR state may change, and exact-head completion policy when engineering work produced a diff.
+2. Add cross-cutting foundations: memory when available, Git policy when repository/PR state may change, `tavall-engineering-policy` for Tavall coding/engineering work, and exact-head completion policy when engineering work produced a diff.
 3. Discover exact installed identities and callable runtime capabilities.
 4. Detect duplicate exact skill identities before load order can silently select one.
 5. Resolve dependencies topologically.
@@ -37,6 +37,7 @@ For substantive repository work, prefer this shape when the installed Tavall AI 
 tavall-skill-orchestrator
 -> tavall-memory-plane when available
 -> tavall-git-workflow when repository/PR state is involved
+-> tavall-engineering-policy for Tavall coding/engineering work
 -> tavall-ai
 -> tavall-agent-orchestration
 -> smallest acceptance-unit specialists
@@ -48,6 +49,23 @@ tavall-skill-orchestrator
 `agent-task-manager` is the narrower harness/task-runtime specialist. It is not the top-level Tavall AI router and its prompt-thread context does not silently replace the Tavall memory-plane foundation.
 
 Use `tavall-agent-scheduler` only for a real distributed placement/recovery/isolation/resource boundary. Use `tavall-ai-distributed-execution` only to route one bounded model call across already-authorized providers/runtimes.
+
+## Engineering-policy behavior
+
+For Tavall coding, debugging, refactoring, testing, review, build/configuration, infrastructure-code, runtime-behavior, and architecture work:
+
+```text
+natural-language Tavall engineering request
+-> tavall-engineering-policy
+-> current tavall-docs shared policy
+-> current Tavall-Architecture-Tests guidance + applicable canonical test sources
+-> stricter repository-local rules
+-> smallest resolved policy/test set for the affected concerns
+```
+
+If the exact skill is missing but those canonical sources are readable, mark the skill `DEGRADED` and perform the resolution directly. If no direct canonical architecture test exists for the target/rule, preserve `NO_DIRECT_CANONICAL_TEST`; analogous tests are references, not execution evidence.
+
+For non-Tavall work, do not select this foundation automatically. Select it only when the user explicitly asks to apply Tavall engineering/architecture standards or invokes the skill directly. That explicit adoption does not automatically add Tavall Git, Tavall CI, Tavall Cloud, or Tavall runtime dependencies to the external project.
 
 ## Exact-head completion behavior
 
@@ -70,6 +88,7 @@ The evidence should retain the exact HEAD, durable job ID, result class, check c
 tavall-skill-orchestrator
 -> tavall-memory-plane
 -> tavall-git-workflow
+-> tavall-engineering-policy
 -> tavall-ai -> tavall-agent-orchestration -> tavall-agent-implementation
 -> tavall-java-tools
 -> tavall-local-ci / typed Tavall Cloud LOCAL_CI
@@ -83,6 +102,7 @@ tavall-skill-orchestrator
 tavall-skill-orchestrator
 -> tavall-memory-plane
 -> tavall-git-workflow when source/PR state changes
+-> tavall-engineering-policy when code/build/config/review work is involved
 -> tavall-ai -> tavall-agent-orchestration when repository work is substantive
 -> tavall-web-agent (discover exact identity)
 -> impeccable when available
@@ -97,12 +117,23 @@ tavall-skill-orchestrator
 tavall-skill-orchestrator
 -> tavall-memory-plane
 -> tavall-git-workflow when repository state changes
+-> tavall-engineering-policy when Builder-related source/build/config/review work is involved
 -> tavall-ai -> tavall-agent-orchestration -> tavall-agent-builder when AI coordination is needed
 -> minecraft-builder
 -> rendering-builder-replays only when replay/render verification is in scope
 -> real Builder Studio/render/bot evidence
 -> tavall-local-ci / typed Tavall Cloud LOCAL_CI when a repo diff exists
 -> memory writeback if verified/reusable
+```
+
+### Explicit Tavall-policy adoption in a non-Tavall project
+
+```text
+non-Tavall repository + explicit user request to apply Tavall standards
+-> tavall-engineering-policy
+-> selected current Tavall Docs / architecture-test guidance
+-> target repository's own implementation/review/validation workflow
+-> no automatic Tavall Git/CI/Cloud/runtime opt-in
 ```
 
 ### PR/staging reconciliation
@@ -144,4 +175,5 @@ Validation should detect:
 - a required skill whose callable runtime dependency is missing;
 - a marketplace plugin whose source path does not exist in the intended integration composition;
 - a diff-producing completed task that skipped exact-head Tavall CI;
-- a completed consequential task that skipped a required foundation.
+- a completed consequential task that skipped a required foundation;
+- a completed Tavall engineering task that skipped current engineering-policy resolution or silently treated an analogous architecture test as executed coverage.

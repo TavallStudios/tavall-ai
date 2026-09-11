@@ -11,7 +11,7 @@ This skill operationalizes Tavall's shared Git/PR workflow. It does not replace 
 
 Before consequential Git/PR decisions, read the current canonical policy:
 
-- repository: `TavallStudios/tavall-project-novus`
+- repository: `TavallStudios/tavall-docs`
 - path: `docs/quality/GIT_WORKFLOW.md`
 
 Then read stricter repository-local authority such as `AGENTS.md`, `AGENT.MD`, `CONTRIBUTING.md`, synchronization contracts, release procedures, staging manifests, and deployment runbooks.

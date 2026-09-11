@@ -1,7 +1,7 @@
 {
   "name": "tavall-ai",
-  "version": "0.2.0",
-  "description": "Load Tavall AI role skills for Function Catalog-backed orchestration, distributed Tavall work, and exact-head local CI completion.",
+  "version": "0.3.0",
+  "description": "Load Tavall AI role skills for current Tavall Docs + architecture-test policy resolution, Function Catalog-backed orchestration, distributed Tavall work, and exact-head local CI completion.",
   "author": {
     "name": "TJ",
     "url": "https://docs.tavall.org/tavall-ai"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Tavall AI",
-    "shortDescription": "Tavall role skills, orchestration, and exact-head CI",
-    "longDescription": "Use Tavall AI role skills to coordinate one session with specialized role agents and escalate through the Tavall scheduler only when a separate worker/session is justified. Function tools come from the authorized Function Catalog surface; Tavall Cloud remains the placement, workspace, process-isolation, resource, and local-CI authority. Diff-producing Tavall engineering runs require durable exact-head local CI before completion.",
+    "shortDescription": "Tavall policy, role skills, orchestration, and exact-head CI",
+    "longDescription": "Use Tavall AI role skills to automatically resolve current Tavall Docs and canonical Tavall Architecture Tests for Tavall engineering work, coordinate specialized role agents, and escalate through the Tavall scheduler only when a separate worker/session is justified. Function tools come from the authorized Function Catalog surface; Tavall Cloud remains the placement, workspace, process-isolation, resource, and local-CI authority. Diff-producing Tavall engineering runs require durable exact-head local CI before completion.",
     "developerName": "TJ",
     "category": "Coding",
     "capabilities": [
@@ -33,6 +33,7 @@
     "termsOfServiceURL": "https://docs.tavall.org/tavall-ai",
     "defaultPrompt": [
       "Use the Tavall AI orchestration skill for substantive Tavall repository work",
+      "For Tavall coding, debugging, refactoring, testing, review, build/configuration, infrastructure-code, runtime-behavior, or architecture work, use tavall-engineering-policy to resolve the live tavall-docs + Tavall-Architecture-Tests policy/test set before material engineering decisions",
       "Prefer multiple specialized Tavall agents inside the current session when they can safely share the owning workspace",
       "Use the scheduler role only for distributed worker/top-level-session placement and never for implementation itself",
       "Treat Function Catalog functions as the callable capability surface and Tavall Cloud as machine/workspace/process/local-CI authority",

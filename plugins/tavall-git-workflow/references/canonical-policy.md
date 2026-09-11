@@ -5,7 +5,7 @@ The source of truth is intentionally not copied into this skill.
 Current shared policy location:
 
 ```text
-repository: TavallStudios/tavall-project-novus
+repository: TavallStudios/tavall-docs
 path: docs/quality/GIT_WORKFLOW.md
 ```
 

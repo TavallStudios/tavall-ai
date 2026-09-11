@@ -1,4 +1,4 @@
-version: 2
+version: 3
 entrypoint: tavall-skill-orchestrator
 policy:
   unknown_skill: discover_before_fallback
@@ -8,6 +8,8 @@ policy:
   installed_skill_precedence: runtime_over_stale_registry
   memory_on_tavall_prompt: route_when_available
   diff_completion: exact_head_local_ci
+  tavall_engineering_policy: automatic
+  external_engineering_policy: explicit_only
 
 discovery:
   sources:
@@ -42,9 +44,27 @@ skills:
     role: foundation
     routes: [git, repository, branch, commit, pull_request, staging, reconciliation, promotion]
     canonical_policy:
-      repository: TavallStudios/tavall-project-novus
+      repository: TavallStudios/tavall-docs
       path: docs/quality/GIT_WORKFLOW.md
     missing_behavior: blocked_for_policy_decisions
+
+  - id: tavall-engineering-policy
+    kind: skill
+    identity: exact_current
+    role: foundation
+    routes: [coding, implementation, debugging, refactoring, testing, review, build_logic, configuration, infrastructure_code, runtime_behavior, architecture]
+    invocation: automatic_for_tavall_engineering
+    external_invocation: explicit_only
+    canonical_policy:
+      repository: TavallStudios/tavall-docs
+      path: docs/quality/CODE_ARCHITECTURE.md
+    canonical_tests:
+      repository: TavallStudios/Tavall-Architecture-Tests
+      paths: [AGENTS.md, README.md, manifest/sources.json, repositories]
+    source:
+      repository: TavallStudios/tavall-ai-agent-task-manager
+      path: plugins/tavall-ai/skills/tavall-engineering-policy/SKILL.md
+    missing_behavior: degraded_to_direct_canonical_policy_resolution
 
   - id: tavall-ai
     kind: skill
@@ -87,7 +107,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [implementation, coding, bounded_acceptance_unit]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-engineering-policy]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-implementation/SKILL.md
@@ -97,7 +117,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [review, code_review, independent_review]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-engineering-policy]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-review/SKILL.md
@@ -127,7 +147,7 @@ skills:
     identity: exact_current
     role: specialist
     routes: [architecture, architecture_migration, structural_repair]
-    requires: [tavall-agent-orchestration]
+    requires: [tavall-agent-orchestration, tavall-engineering-policy]
     source:
       repository: TavallStudios/tavall-ai-agent-task-manager
       path: plugins/tavall-ai/skills/tavall-agent-architecture/SKILL.md

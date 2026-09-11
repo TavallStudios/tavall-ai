@@ -9,7 +9,9 @@ Use this as the normal coordination agent after the top-level session/workspace 
 
 Coordinate the smallest useful set of specialized agents. Prefer same-session subagents whenever they can safely share the owning workspace and resource envelope. Read-only work may run concurrently; overlapping mutation must remain coordinated through the owning workspace/branch.
 
-Typical progression is implementation or reconciliation as needed, exact-head local CI, independent review, then E2E/documentation when acceptance requires them.
+For implementation, code review, or architecture work, ensure `tavall-engineering-policy` has resolved the current applicable `tavall-docs`, canonical architecture tests, and stricter repository-local rules before the specialist makes material decisions. Re-resolve policy if the task expands into a new architecture concern.
+
+Typical progression is engineering-policy resolution, implementation or reconciliation as needed, exact-head local CI, independent review, then E2E/documentation when acceptance requires them.
 
 Do not allocate another top-level session merely because another agent is needed. Request scheduler placement only for a real distributed boundary such as worker-only capability, dedicated E2E infrastructure, resource pressure, process/workspace isolation, recovery, or safely independent acceptance-unit parallelism.
 
