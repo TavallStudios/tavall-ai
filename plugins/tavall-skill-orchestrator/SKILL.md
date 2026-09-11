@@ -1,6 +1,6 @@
 ---
 name: tavall-skill-orchestrator
-description: Use as the entry-point router for Tavall-related work. Resolve the smallest required Tavall skill graph from the live installed/runtime surface, route Tavall prompts through the memory foundation when available, require tavall-git-workflow for repository/PR policy, route substantive repository work through the Tavall AI agent family when exposed, require exact-head Tavall local CI after diff-producing engineering work, and surface degraded or missing dependencies instead of silently skipping them.
+description: Use as the entry-point router for Tavall-related work. Resolve the smallest required Tavall skill graph from the live installed/runtime surface, automatically require tavall-engineering-policy for material Tavall engineering, use tavall-documentation-context for exact selective current-main documentation lookup, require tavall-git-workflow for repository/PR policy, route substantive repository work through the Tavall AI agent family when exposed, require exact-head Tavall local CI after diff-producing engineering work, and surface degraded or missing dependencies instead of silently skipping them.
 ---
 
 # Tavall Skill Orchestrator
@@ -21,14 +21,16 @@ For every Tavall-related prompt:
 2. Discover the currently exposed installed skills, connected plugins, repository-local skills, and callable capability surfaces before trusting a remembered registry entry.
 3. Route through `tavall-memory-plane` when available. The memory skill decides whether the prompt needs BOOTSTRAP, INVESTIGATION, WRITEBACK, REVIEW, VALIDATION, or no provider call.
 4. If the memory skill/runtime is unavailable, mark memory `DEGRADED` and continue from current repository/runtime evidence where safe. Never pretend memory hydration occurred.
-5. If branch, commit, pull-request, staging, reconciliation, promotion, or repository mutation may occur, require `tavall-git-workflow` before making Git/GitHub policy decisions.
-6. For substantive Tavall repository work, route through `tavall-ai` and then `tavall-agent-orchestration` when that installed agent family is exposed. Let orchestration select the smallest useful acceptance-unit specialists.
-7. Do not use `tavall-agent-scheduler` merely because another specialist is useful. Scheduler placement is for a real worker, resource, isolation, recovery, or safely independent parallel-work boundary. Do not confuse it with `tavall-ai-distributed-execution`, which routes one already-authorized model call.
-8. Add domain specialists such as Web Agent, Minecraft Builder, Java Tools, or Tavall Cloud only when the task crosses their ownership boundary.
-9. Resolve required dependencies topologically and execute through the selected specialists/tools.
-10. If Tavall engineering work produced a diff, require `tavall-local-ci` or the current typed Tavall Cloud exact-head LOCAL_CI equivalent before claiming completion. A prior successful job for another SHA is stale evidence.
-11. Validate both the domain result and its integration boundary.
-12. After verified reusable work, route through `tavall-memory-plane` WRITEBACK when available. Do not persist ordinary tool chatter or unverified conclusions.
+5. For material Tavall coding, debugging, refactoring, testing, review, build/configuration, infrastructure-code, runtime-behavior, or architecture work, automatically require `tavall-engineering-policy` before material engineering decisions. That skill identifies concrete governed concerns rather than assuming every policy document applies.
+6. When shared or repository documentation must be resolved, require `tavall-documentation-context`. Prefer an explicit document path/name; otherwise use exact user-prompt signals, then exact grounded reasoning labels. Shared Tavall documentation always resolves from current `TavallStudios/tavall-docs@main`. Never preload the full documentation tree.
+7. If branch, commit, pull-request, staging, reconciliation, promotion, or repository mutation may occur, require `tavall-git-workflow` before making Git/GitHub policy decisions.
+8. For substantive Tavall repository work, route through `tavall-ai` and then `tavall-agent-orchestration` when that installed agent family is exposed. Let orchestration select the smallest useful acceptance-unit specialists.
+9. Do not use `tavall-agent-scheduler` merely because another specialist is useful. Scheduler placement is for a real worker, resource, isolation, recovery, or safely independent parallel-work boundary. Do not confuse it with `tavall-ai-distributed-execution`, which routes one already-authorized model call.
+10. Add domain specialists such as Web Agent, Minecraft Builder, Java Tools, or Tavall Cloud only when the task crosses their ownership boundary.
+11. Resolve required dependencies topologically and execute through the selected specialists/tools.
+12. If Tavall engineering work produced a diff, require `tavall-local-ci` or the current typed Tavall Cloud exact-head LOCAL_CI equivalent before claiming completion. A prior successful job for another SHA is stale evidence.
+13. Validate both the domain result and its integration boundary.
+14. After verified reusable work, route through `tavall-memory-plane` WRITEBACK when available. Do not persist ordinary tool chatter or unverified conclusions.
 
 ## Availability states
 
@@ -62,6 +64,14 @@ The live installed skill identity wins over a stale source pointer. When an alia
 
 Do not count AgentTaskManager prompt-thread/task-runtime context as memory-plane hydration unless the memory-plane skill explicitly declares equivalence.
 
+### Engineering policy
+
+`tavall-engineering-policy` owns Tavall engineering concern identification and policy applicability. It delegates document discovery to `tavall-documentation-context` and canonical executable-rule lookup to `Tavall-Architecture-Tests`. It must not maintain a private frozen copy of the Tavall Docs routing taxonomy.
+
+### Documentation context
+
+`tavall-documentation-context` owns read-only documentation discovery. Its canonical routing table is current `TavallStudios/tavall-docs@main:docs/quality/DOCUMENT_ROUTING.yml`. It selects the smallest document set using explicit paths/names and exact prompt/reasoning signals, with targeted search as the unresolved fallback. Recursive documentation preloads are an orchestration failure, not a thoroughness feature.
+
 ### Git
 
 `tavall-git-workflow` owns Tavall branch, PR, stacking, staging, reconciliation, promotion, and GitHub workflow decisions. Domain skills delegate those policy decisions instead of maintaining divergent Git doctrine.
@@ -76,13 +86,15 @@ When the installed Tavall AI plugin exposes the current skill family:
 
 - `tavall-ai`: top-level Tavall AI operating/runtime router.
 - `agent-task-manager`: narrow AgentTaskManager harness/task-runtime specialist.
+- `tavall-engineering-policy`: automatic engineering concern/policy foundation.
+- `tavall-documentation-context`: selective read-only documentation resolver.
 - `tavall-agent-orchestration`: normal coordination specialist for substantive repository work.
 - `tavall-agent-implementation`: bounded implementation acceptance unit.
 - `tavall-agent-review`: independent exact-head review.
 - `tavall-agent-reconciliation`: PR/staging/topology and drift reconciliation.
 - `tavall-agent-e2e`: realistic runtime/E2E acceptance.
 - `tavall-agent-architecture`: explicitly approved structural migration/repair.
-- `tavall-agent-documentation`: technical/evidence documentation.
+- `tavall-agent-documentation`: technical/evidence documentation mutation and documentation-context ownership.
 - `tavall-agent-scheduler`: durable distributed worker/session placement only.
 - `tavall-agent-builder`: Tavall AI coordination around authoritative Builder implementation.
 - `tavall-ai-distributed-execution`: provider/runtime routing for one authorized model call.
@@ -96,6 +108,8 @@ Use `registry.yaml` for the bootstrap routing map. Important boundaries:
 - `tavall-ai` and its `tavall-agent-*` family own Tavall AI agent/runtime coordination.
 - `agent-task-manager` owns the narrower harness/task-runtime workflow and its prompt-thread context.
 - `tavall-memory-plane` owns Tavall durable context hydration, memory investigation, reviewed writeback, and memory-plane validation.
+- `tavall-engineering-policy` owns engineering concern/policy applicability.
+- `tavall-documentation-context` owns selective current documentation lookup.
 - `tavall-git-workflow` owns Git/PR/staging/reconciliation/promotion policy.
 - `tavall-local-ci` owns exact-final-HEAD completion policy when installed.
 - `minecraft-builder` owns Minecraft/Builder Studio build implementation and build-oriented verification; `tavall-agent-builder` coordinates around it without duplicating it.
