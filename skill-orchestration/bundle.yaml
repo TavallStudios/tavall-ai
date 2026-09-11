@@ -1,5 +1,5 @@
 name: tavall-skill-orchestration-bundle
-version: 0.2.0
+version: 0.3.0
 entrypoint: tavall-skill-orchestrator
 components:
   - tavall-skill-orchestrator
@@ -9,13 +9,14 @@ external_foundations:
 integrates:
   - tavall-ai
   - agent-task-manager
+  - tavall-engineering-policy
+  - tavall-documentation-context
   - tavall-agent-orchestration
   - tavall-agent-implementation
   - tavall-agent-review
   - tavall-agent-reconciliation
   - tavall-agent-e2e
   - tavall-agent-architecture
-  - tavall-documentation-context
   - tavall-agent-documentation
   - tavall-agent-scheduler
   - tavall-agent-builder
