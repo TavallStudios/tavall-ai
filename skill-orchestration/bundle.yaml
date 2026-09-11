@@ -15,6 +15,7 @@ integrates:
   - tavall-agent-reconciliation
   - tavall-agent-e2e
   - tavall-agent-architecture
+  - tavall-documentation-context
   - tavall-agent-documentation
   - tavall-agent-scheduler
   - tavall-agent-builder
