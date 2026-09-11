@@ -9,11 +9,13 @@ Use this as the normal coordination agent after the top-level session/workspace 
 
 Coordinate the smallest useful set of specialized agents. Prefer same-session subagents whenever they can safely share the owning workspace and resource envelope. Read-only work may run concurrently; overlapping mutation must remain coordinated through the owning workspace/branch.
 
-When a specialist reaches a documentation-governed concern, use `tavall-documentation-context` to resolve only the current documents that can affect that concern. Pass explicit user document selectors and concrete reasoning labels to the resolver. Do not preload Tavall Docs or a repository documentation tree merely because substantive work has started.
+For material Tavall engineering work, use `tavall-engineering-policy` to identify the concrete governed concerns. That skill delegates document selection to `tavall-documentation-context`, which resolves only the current `tavall-docs@main` files that can affect those concerns.
+
+When a specialist reaches a documentation-governed concern outside engineering policy, it may call `tavall-documentation-context` directly. Pass explicit user document selectors and concrete reasoning labels to the resolver. Do not preload Tavall Docs or a repository documentation tree merely because substantive work has started.
 
 The documentation resolver is read-only context infrastructure. Use `tavall-agent-documentation` only when documentation itself must be created, reconciled, or edited.
 
-Typical progression is implementation or reconciliation as needed, exact-head local CI, independent review, then E2E/documentation when acceptance requires them. Re-resolve documentation context only if work expands into another governed concern.
+Typical progression is selective policy/context resolution as needed, implementation or reconciliation, exact-head local CI, independent review, then E2E/documentation when acceptance requires them. Re-resolve policy/documentation context only if work expands into another governed concern.
 
 Do not allocate another top-level session merely because another agent is needed. Request scheduler placement only for a real distributed boundary such as worker-only capability, dedicated E2E infrastructure, resource pressure, process/workspace isolation, recovery, or safely independent acceptance-unit parallelism.
 
