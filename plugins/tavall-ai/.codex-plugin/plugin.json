@@ -1,7 +1,7 @@
 {
-  "name": "tavall-ai",
-  "version": "0.2.0",
-  "description": "Load Tavall AI role skills for Function Catalog-backed orchestration, distributed Tavall work, and exact-head local CI completion.",
+  "name": "tavall-ai-plugin",
+  "version": "0.3.0",
+  "description": "Portable Tavall AI entry point: Tavall agents, the Tavall skill orchestrator, and discovery of the authenticated Tavall MCP/Console capability surface.",
   "author": {
     "name": "TJ",
     "url": "https://docs.tavall.org/tavall-ai"
@@ -10,18 +10,19 @@
   "license": "Proprietary",
   "keywords": [
     "tavall-ai",
-    "codex",
     "agents",
     "orchestration",
+    "mcp",
     "function-catalog",
-    "local-ci",
-    "github-checks"
+    "tavall-console",
+    "codex",
+    "gemini"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Tavall AI",
-    "shortDescription": "Tavall role skills, orchestration, and exact-head CI",
-    "longDescription": "Use Tavall AI role skills to coordinate one session with specialized role agents and escalate through the Tavall scheduler only when a separate worker/session is justified. Function tools come from the authorized Function Catalog surface; Tavall Cloud remains the placement, workspace, process-isolation, resource, and local-CI authority. Diff-producing Tavall engineering runs require durable exact-head local CI before completion.",
+    "shortDescription": "Tavall agents, orchestration, and MCP/Console discovery",
+    "longDescription": "Use one portable Tavall AI plugin across AI clients. The bundled orchestrator discovers the live Tavall MCP/Function Catalog surface, bootstraps or resumes the current Tavall development session, routes work to the bundled Tavall agent roles, and executes ordinary engineering commands through Tavall Console instead of inventing client-specific workflows.",
     "developerName": "TJ",
     "category": "Coding",
     "capabilities": [
@@ -32,12 +33,13 @@
     "privacyPolicyURL": "https://docs.tavall.org/tavall-ai",
     "termsOfServiceURL": "https://docs.tavall.org/tavall-ai",
     "defaultPrompt": [
-      "Use the Tavall AI orchestration skill for substantive Tavall repository work",
-      "Prefer multiple specialized Tavall agents inside the current session when they can safely share the owning workspace",
-      "Use the scheduler role only for distributed worker/top-level-session placement and never for implementation itself",
-      "Treat Function Catalog functions as the callable capability surface and Tavall Cloud as machine/workspace/process/local-CI authority",
-      "Commit and push meaningful mutation checkpoints so distributed recovery can resume from Git rather than unpublished workstation state",
-      "Before completing any diff-producing Tavall engineering run, use the bundled tavall-local-ci skill to submit durable profile=all validation for the exact final HEAD"
+      "Use tavall-skill-orchestrator as the normal entry point for Tavall work",
+      "Discover the live Tavall MCP and Function Catalog surface before assuming capabilities",
+      "Bootstrap or resume the current Tavall development session before creating new environments, lanes, or workspaces",
+      "Route substantive work to the smallest useful set of bundled Tavall agent roles",
+      "Prefer Tavall Console with normal tavall, git, gh, build, and shell commands over bespoke MCP wrappers",
+      "Use tavall-agent-scheduler only when placement, isolation, resource pressure, recovery, or safely independent parallel work requires another worker/session",
+      "Validate diff-producing work against the exact final HEAD using repository-owned validation through the authorized Tavall execution surface"
     ],
     "brandColor": "#0F766E"
   }
