@@ -29,7 +29,7 @@ final class TavallAINodeAgentRuntime {
                     "Tavall AI Node Agent requires exactly one authorized host adapter; found " + hosts.size()
             );
         }
-        return hosts.getFirst().run(context, List.copyOf(arguments), output);
+        return hosts.getFirst().run(context.agents(), List.copyOf(arguments), output);
     }
 
     private static void requireInstalledComposition(TavallAIRuntimeContext context, String runtimeName) {
