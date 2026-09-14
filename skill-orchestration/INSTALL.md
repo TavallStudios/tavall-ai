@@ -2,44 +2,31 @@
 
 ## Installation model
 
-Install `tavall-skill-orchestrator` and `tavall-git-workflow` as sibling Tavall Coding skills/plugins. Keep domain skills separately installed/discoverable. When the Tavall AI plugin is installed, its marketplace source is `./plugins/tavall-ai` and its top-level operating skill is `tavall-ai`.
+Install **one** Tavall AI package: `plugins/tavall-ai` (`tavall-ai-plugin`).
 
-Make `tavall-skill-orchestrator` the Tavall entry-point instruction rather than copying its routing logic into every specialist:
+That package now carries the Tavall orchestrator, Git workflow, staging workflow, selective engineering/documentation policy, memory routing, specialized agents, local-CI completion guidance, and client manifests/adapters. Do not install standalone Tavall orchestrator or Git-workflow plugins alongside it.
 
-```text
-For Tavall-related work, invoke tavall-skill-orchestrator first. It owns broad skill discovery, foundation checks, Tavall AI agent-family routing, and completion-gate selection. Domain skills own implementation and must not bypass required Git, memory, or exact-head completion policy.
-```
+Use `tavall-skill-orchestrator` as the normal Tavall entry point. The prompt should only need to ask the client to load the installed Tavall plugin and orchestrator; routing policy belongs in the package rather than being recopied into every prompt.
 
-## Memory dependency
+## Capability model
 
-`tavall-memory-plane` remains an external foundation. This bundle does not copy the memory skill into itself. For substantive Tavall work, acceptance requires `memoryContext` or the current equivalent when the memory skill/runtime exposes it. If unavailable, report memory as degraded and continue only from current authoritative evidence where safe.
+The package discovers the current Tavall MCP/Function Catalog and DEVELOPMENT session at runtime. It prefers Tavall Console and normal `tavall`, `git`, `gh`, build, test, and shell commands for ordinary execution. Client-specific transport is an adapter concern.
 
-## Tavall AI agent family
-
-When the current Tavall AI plugin is installed, acceptance should resolve the exact top-level `tavall-ai` skill plus the specialized `tavall-agent-*` skills exposed by that plugin. `agent-task-manager` must remain a distinct narrower identity rather than colliding with the `tavall-ai` entry point.
-
-## Exact-head completion
-
-`tavall-local-ci` is a conditional completion skill. A diff-producing Tavall engineering run must validate its final immutable HEAD through that skill when installed, or through the current typed Tavall Cloud LOCAL_CI equivalent when the skill is degraded. Do not treat ordinary local tests or a successful job for another SHA as current exact-head CI evidence.
+Memory, browser/design, Builder, recovery, repository-staging, and other domain capabilities may degrade when their authoritative runtime surface is unavailable. Missing capability must remain visible; do not fabricate a fallback authority.
 
 ## Acceptance checks
 
-1. `tavall-skill-orchestrator` is discoverable by exact name.
-2. `tavall-git-workflow` is discoverable by exact name.
-3. Marketplace `tavall-ai` resolves to `./plugins/tavall-ai` in the ChatGPT/Tavall AI integration composition.
-4. `tavall-ai` resolves as the top-level Tavall AI operating entry point.
-5. `agent-task-manager` resolves as a distinct harness/task-runtime specialist with no duplicate `tavall-ai` identity.
-6. `tavall-agent-orchestration` and the installed acceptance-unit specialists resolve from the Tavall AI plugin.
-7. `tavall-agent-scheduler` is not selected merely to obtain another same-session specialist.
-8. `tavall-ai-distributed-execution` remains model-call routing, not durable workload scheduling.
-9. `tavall-memory-plane` and its memory capability resolve when installed; otherwise the route visibly degrades.
-10. `minecraft-builder`, replay rendering, Web Agent, Impeccable, Java Tools, and Tavall Cloud resolve through their current installed/catalog surfaces without invented identities.
-11. A diff-producing engineering route selects `tavall-local-ci` or the typed Tavall Cloud exact-head equivalent before completion.
-12. A missing required foundation produces `DEGRADED`, `MISSING`, or `BLOCKED`, never silent omission.
-13. The Git skill reads the current canonical `GIT_WORKFLOW.md` and stricter repository-local rules before consequential PR topology changes.
-14. Registry/bundle/agent YAML and marketplace JSON parse cleanly.
-15. No circular required dependency exists in the initial graph.
+1. Marketplace exposes exactly one Tavall AI package: `tavall-ai-plugin` -> `./plugins/tavall-ai`.
+2. `tavall-skill-orchestrator` resolves from inside that package.
+3. `tavall-git-workflow`, staging workflow, selective policy/docs, memory-plane guidance, and exact-head completion guidance resolve from the same package.
+4. Core and domain `tavall-agent-*` roles are discoverable from the package, including orchestration, implementation, review, reconciliation, E2E, architecture, documentation, scheduler, Builder, Web, and Recovery.
+5. Agent selection does not create another top-level worker unless placement/isolation/resources/recovery actually require it.
+6. The live Tavall catalog is discovered before assuming domain capabilities.
+7. Diff-producing work binds validation to the exact final HEAD/source snapshot.
+8. PR/staging acceptance binds the exact source snapshot to the matching Tavall lane/environment generation.
+9. A missing required foundation/capability produces visible `DEGRADED`, `MISSING`, or `BLOCKED` state rather than silent omission.
+10. Plugin JSON/YAML/frontmatter parse cleanly and no duplicate installable Tavall AI plugin identity remains.
 
-## Runtime acceptance
+## Staging
 
-Run at least one Tavall engineering prompt from the installed ChatGPT surface and inspect the route. For a repository mutation, the expected shape is memory when available -> Git policy -> Tavall AI -> Tavall agent orchestration -> narrow specialist(s) -> exact-head LOCAL_CI -> review/E2E as required -> conditional memory writeback. Record only evidence actually observed.
+Plugin changes integrate through the active `staging/plugin` PR described by `.github/TAVALL_PLUGIN_STAGING.md`. After a plugin staging generation promotes to `main`, recreate `staging/plugin` from the new `main` and open the next active staging PR.

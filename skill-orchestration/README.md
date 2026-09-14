@@ -1,19 +1,20 @@
-# Tavall Skill Orchestration Bundle
+# Tavall AI Plugin Orchestration
 
-This bundle provides Tavall-wide skill routing plus reusable Git/PR policy routing.
+Tavall skill routing is now packaged inside the single portable `tavall-ai-plugin` at `plugins/tavall-ai`.
 
-The router exists because having a skill in a repository, plugin, or memory does not guarantee that an agent will invoke the correct current identity. Required foundations, the live Tavall AI agent family, domain specialists, and completion gates therefore form an explicit dependency graph with observable health states.
+The package contains:
 
-## Components
+- `tavall-skill-orchestrator` as the entry point;
+- its registry and health/routing reference;
+- shared Git/staging/promotion policy skills;
+- selective engineering/documentation policy resolution;
+- memory-plane guidance;
+- specialized Tavall agent skills and portable agent descriptors;
+- local exact-head completion guidance;
+- client manifests/adapters while keeping capability logic client-neutral.
 
-- `tavall-skill-orchestrator`: Tavall entry-point discovery, dependency ordering, capability health, Tavall AI agent-family routing, and missing-skill behavior.
-- `tavall-git-workflow`: shared Git/PR/stacking/staging/reconciliation policy backed by the current canonical `GIT_WORKFLOW.md`.
-- `registry.yaml`: bootstrap inventory for current exact skills, aliases, helper bundles, conditional completion gates, and capability families. Runtime discovery is authoritative over stale aliases.
+The orchestrator exists because merely having a skill or capability somewhere does not guarantee an AI will select the correct current authority. It discovers the installed package and live Tavall MCP/Function Catalog, loads only relevant foundations, selects the smallest useful agent set, and keeps missing/degraded capabilities visible.
 
-## Current Tavall AI shape
+Standalone `tavall-skill-orchestrator` and `tavall-git-workflow` plugin packages are superseded by the bundled copies. Client prompts should install/load one Tavall AI package rather than reconstructing the routing graph themselves.
 
-The live Tavall AI plugin is the top-level AI/runtime domain entry point. Substantive repository work normally routes from `tavall-ai` into `tavall-agent-orchestration`, which selects bounded implementation/review/reconciliation/E2E/architecture/documentation specialists. `tavall-agent-scheduler` is reserved for genuine distributed placement; `tavall-ai-distributed-execution` routes individual authorized model calls. `agent-task-manager` is a narrower harness/task-runtime specialist.
-
-For diff-producing Tavall engineering work, `tavall-local-ci` or the same typed Tavall Cloud exact-head LOCAL_CI contract is the completion boundary.
-
-The bundle deliberately does not clone specialist skill bodies. Specialists remain independently versioned and own their domains.
+Plugin integration is owned by the active `staging/plugin` PR and `.github/TAVALL_PLUGIN_STAGING.md`.
