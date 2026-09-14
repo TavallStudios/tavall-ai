@@ -1,0 +1,5 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "tavall-ai-plugin",
+  "description": "Portable Tavall AI package containing Tavall agent roles and the Tavall skill orchestrator. The orchestrator discovers the connected Tavall MCP/Function Catalog surface and executes ordinary work through Tavall Console."
+}
