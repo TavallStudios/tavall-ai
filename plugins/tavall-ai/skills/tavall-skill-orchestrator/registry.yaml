@@ -1,0 +1,73 @@
+version: 4
+entrypoint: tavall-skill-orchestrator
+
+policy:
+  installed_plugin_authority: plugins/tavall-ai
+  unknown_skill: discover_before_fallback
+  required_dependency_missing: surface_and_degrade_or_block
+  duplicate_authority: resolve_by_repo_policy_then_narrowest_owner
+  historical_memory_is_authority: false
+  diff_completion: exact_head_repository_validation
+  engineering_policy: selective_current_authority
+  staging_evidence: exact_source_snapshot_to_environment_generation
+
+foundations:
+  - tavall-git-workflow
+  - tavall-documentation-context
+  - tavall-engineering-policy
+  - tavall-memory-plane
+  - tavall-staging-pr-workflow
+  - tavall-staging-reconciliation
+  - tavall-staging-promotion
+  - tavall-local-ci
+
+agents:
+  - id: tavall-agent-orchestration
+    routes: [coordination, substantive_repository_work]
+  - id: tavall-agent-implementation
+    routes: [implementation, coding, bounded_acceptance_unit]
+  - id: tavall-agent-review
+    routes: [review, code_review, exact_head_review]
+  - id: tavall-agent-reconciliation
+    routes: [reconciliation, pr_graph, staging, migration]
+  - id: tavall-agent-e2e
+    routes: [e2e, runtime_acceptance, realistic_validation]
+  - id: tavall-agent-architecture
+    routes: [architecture, structural_migration, systemic_repair]
+  - id: tavall-agent-documentation
+    routes: [documentation, technical_docs, evidence_docs]
+  - id: tavall-agent-scheduler
+    routes: [distributed_placement, worker_selection, top_level_session_placement]
+  - id: tavall-agent-recovery
+    routes: [recovery, incident_recovery, service_recovery, node_recovery]
+  - id: tavall-agent-builder
+    routes: [builder, minecraft_build, builder_studio, world_build]
+  - id: tavall-agent-web
+    routes: [web, frontend, website, ui, browser_acceptance]
+
+runtime_specialists:
+  - id: tavall-ai-distributed-execution
+    routes: [model_execution, provider_routing, bounded_failover]
+  - id: agent-task-manager
+    routes: [legacy_harness, task_runtime, prompt_thread_context]
+
+capability_discovery:
+  mcp_semantics:
+    status: [cloud_status]
+    session_bootstrap: [cloud_dev_session_bootstrap]
+    console: [cloud_console_execute, cloud_dev_environment_execute]
+    catalog_list: [cloud_catalog_list]
+    catalog_describe: [cloud_catalog_describe]
+    artifact_read: [cloud_read_sandbox_artifact]
+  rules:
+    - Match by semantics and live catalog metadata before hard-coding a client namespace.
+    - Prefer Tavall Console and normal tavall/git/gh/build/shell commands over bespoke MCP wrappers.
+    - Discover typed domain capabilities at execution time when they are not part of the small bootstrap surface.
+    - Agent metadata describes behavior and requested capabilities; it never grants authority.
+
+completion:
+  mutation_requires:
+    - meaningful_git_checkpoint
+    - exact_final_head_validation
+    - truthful_unverified_path_reporting
+  source_promotion_is_deployment: false
