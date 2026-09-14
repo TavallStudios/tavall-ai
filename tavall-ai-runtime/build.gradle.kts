@@ -9,6 +9,7 @@ application {
 dependencies {
     implementation(project(":tavall-ai-bootstrap"))
     implementation(project(":tavall-ai-runtime-distributed-execution"))
+    implementation(project(":tavall-ai-runtime-memory"))
 
     runtimeOnly(project(":tavall-agent-scheduler"))
     runtimeOnly(project(":tavall-agent-orchestration"))
@@ -19,13 +20,9 @@ dependencies {
     runtimeOnly(project(":tavall-agent-architecture"))
     runtimeOnly(project(":tavall-agent-documentation"))
     runtimeOnly(project(":tavall-agent-builder"))
+    runtimeOnly(project(":tavall-agent-recovery"))
+    runtimeOnly(project(":tavall-agent-web"))
 
-    // Transitional source-control dependencies. These AI runtime/provider modules move into this
-    // repository in the next stacked migration; Function Catalog remains the function/MCP system.
-    implementation("org.tavall:agent-runtime") {
-        version { branch = "main" }
-    }
-    runtimeOnly("org.tavall:codex-agent-provider") {
-        version { branch = "main" }
-    }
+    implementation(project(":tavall-ai-runtime-model-execution"))
+    runtimeOnly(project(":tavall-ai-runtime-codex"))
 }
