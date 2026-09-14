@@ -4,7 +4,7 @@
 Type: DOMAIN_INTEGRATION
 State: ACTIVE
 Branch: staging/runtime-chatgpt-web
-Parent: PR #8 / `working/tavall-ai-distributed-execution-runtime`
+Parent: `staging/runtime` / PR #7
 Promotion: MANUAL
 ChildMergeTarget: staging/runtime-chatgpt-web
 
@@ -12,17 +12,17 @@ ChildMergeTarget: staging/runtime-chatgpt-web
 
 Durable integration and validation lane for the Tavall AI `CHATGPT_WEB` executable composition.
 
-The shared parent runtime, bootstrap, installed `tavall-agent-*` packages, and reusable AI runtime capability modules remain owned by #8 and its shared children. Agent roles and Function Catalog schemas are not separate process runtimes.
+Shared runtime integration belongs to `staging/runtime`. Portable client-facing Tavall AI plugin packaging, agents, orchestration skills, and plugin adapters belong to the active `staging/plugin` root. Reusable `tavall-agent-*` runtime packages and shared runtime capability modules remain with their owning runtime/domain PRs.
 
-This lane owns ChatGPT-Web-host-specific runtime composition, dispatch/session/plugin adapters, readiness/lifecycle, deployment wiring, and exact DEVELOPMENT acceptance.
+This lane owns ChatGPT-Web-host-specific runtime composition, lifecycle/readiness, deployment wiring, transport integration, and exact DEVELOPMENT acceptance. It must not recreate a ChatGPT-specific Tavall agent/orchestration package or a second capability authority.
 
 ## Acceptance focus
 
-- Java 25 local verification and staged distribution checks;
+- Java 25 repository-local verification and staged distribution checks when runtime code changes;
 - ChatGPT Web runtime startup/shutdown and installed-agent discovery;
 - runtime-module requirement validation;
-- typed Function Catalog dispatch/session surfaces through the authorized adapter boundary;
-- Tavall Cloud operational authority remaining external and fail-closed;
-- restart/recovery, rollback, and untested-path evidence.
+- Tavall plugin/MCP/Function Catalog transport compatibility through the authorized adapter boundary;
+- Tavall Console/Cloud operational authority remaining external and fail-closed;
+- restart/recovery, rollback, exact source/environment binding, and untested-path evidence.
 
-This initial commit establishes the lane only. It starts no model process, browser session, Cloud job, deployment, or production mutation.
+A child merge into this lane is integration evidence only. It does not imply `main` promotion or deployment.
