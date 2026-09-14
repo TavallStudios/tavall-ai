@@ -11,6 +11,7 @@ include(
     "tavall-agent-architecture",
     "tavall-agent-documentation",
     "tavall-agent-builder",
+    "tavall-agent-recovery",
     "tavall-ai-runtime-distributed-execution",
     "tavall-ai-runtime",
 )
