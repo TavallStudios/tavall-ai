@@ -28,8 +28,9 @@ class TavallAIRuntimeMainTest {
         assertTrue(description.contains("agents=9"));
         assertTrue(description.contains("agent=builder"));
         assertTrue(description.contains("agent=scheduler"));
-        assertTrue(description.contains("modules=1"));
+        assertTrue(description.contains("modules=2"));
         assertTrue(description.contains("module=distributed-execution"));
+        assertTrue(description.contains("module=memory"));
     }
 
     @Test
@@ -39,8 +40,9 @@ class TavallAIRuntimeMainTest {
         assertTrue(description.contains("runtime=CHATGPT_WEB"));
         assertTrue(description.contains("agents=9"));
         assertTrue(description.contains("agent=builder"));
-        assertTrue(description.contains("modules=1"));
+        assertTrue(description.contains("modules=2"));
         assertTrue(description.contains("module=distributed-execution"));
+        assertTrue(description.contains("module=memory"));
     }
 
     private String describe(String runtime) throws Exception {

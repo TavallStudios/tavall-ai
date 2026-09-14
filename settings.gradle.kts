@@ -12,6 +12,7 @@ include(
     "tavall-agent-documentation",
     "tavall-agent-builder",
     "tavall-ai-runtime-distributed-execution",
+    "tavall-ai-runtime-memory",
     "tavall-ai-runtime",
 )
 
