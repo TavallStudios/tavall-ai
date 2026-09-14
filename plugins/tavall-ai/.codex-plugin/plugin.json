@@ -1,7 +1,7 @@
 {
   "name": "tavall-ai-plugin",
-  "version": "0.3.0",
-  "description": "Portable Tavall AI entry point: Tavall agents, the Tavall skill orchestrator, and discovery of the authenticated Tavall MCP/Console capability surface.",
+  "version": "0.4.0",
+  "description": "Portable Tavall AI package: orchestrator, Git/staging policy, Tavall agents, memory/policy routing, exact-head completion guidance, and live Tavall MCP/Console capability discovery.",
   "author": {
     "name": "TJ",
     "url": "https://docs.tavall.org/tavall-ai"
@@ -12,17 +12,20 @@
     "tavall-ai",
     "agents",
     "orchestration",
+    "staging",
+    "memory",
     "mcp",
     "function-catalog",
     "tavall-console",
     "codex",
-    "gemini"
+    "gemini",
+    "antigravity"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Tavall AI",
-    "shortDescription": "Tavall agents, orchestration, and MCP/Console discovery",
-    "longDescription": "Use one portable Tavall AI plugin across AI clients. The bundled orchestrator discovers the live Tavall MCP/Function Catalog surface, bootstraps or resumes the current Tavall development session, routes work to the bundled Tavall agent roles, and executes ordinary engineering commands through Tavall Console instead of inventing client-specific workflows.",
+    "shortDescription": "One Tavall AI plugin for agents, orchestration, staging, and Console discovery",
+    "longDescription": "Use one portable Tavall AI plugin across AI clients. The bundled orchestrator discovers the live Tavall MCP/Function Catalog and current development session, loads only relevant Git/staging/policy/memory foundations, routes work to the bundled Tavall agent roles, and executes ordinary engineering commands through Tavall Console instead of inventing client-specific workflows.",
     "developerName": "TJ",
     "category": "Coding",
     "capabilities": [
@@ -36,9 +39,11 @@
       "Use tavall-skill-orchestrator as the normal entry point for Tavall work",
       "Discover the live Tavall MCP and Function Catalog surface before assuming capabilities",
       "Bootstrap or resume the current Tavall development session before creating new environments, lanes, or workspaces",
+      "Use bundled Git/staging/policy/memory foundations only when relevant to the active concern",
       "Route substantive work to the smallest useful set of bundled Tavall agent roles",
-      "Prefer Tavall Console with normal tavall, git, gh, build, and shell commands over bespoke MCP wrappers",
+      "Prefer Tavall Console with normal tavall, git, gh, build, test, and shell commands over bespoke MCP wrappers",
       "Use tavall-agent-scheduler only when placement, isolation, resource pressure, recovery, or safely independent parallel work requires another worker/session",
+      "Bind staging acceptance to the exact source snapshot and matching Tavall environment generation",
       "Validate diff-producing work against the exact final HEAD using repository-owned validation through the authorized Tavall execution surface"
     ],
     "brandColor": "#0F766E"
