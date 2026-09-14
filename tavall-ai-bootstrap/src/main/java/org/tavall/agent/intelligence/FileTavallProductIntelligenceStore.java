@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -34,79 +35,54 @@ import java.util.stream.Stream;
 public final class FileTavallProductIntelligenceStore implements TavallProductIntelligenceStore {
     private static final Pattern PATH_IDENTIFIER = Pattern.compile("[A-Za-z0-9._-]+");
     private static final String FILE_SUFFIX = ".properties";
+    private static final String SNAPSHOT_FILE = "intelligence.snapshot.properties";
+    private static final String SNAPSHOT_VERSION = "1";
     private static final String TEMP_FILE_PREFIX = "tpi-";
-    private static final String BATCH_FORMAT = "batch-v1";
 
     private final Path root;
+    private final SnapshotCommitter snapshotCommitter;
 
     public FileTavallProductIntelligenceStore(Path root) {
+        this(root, FileTavallProductIntelligenceStore::commitSnapshot);
+    }
+
+    FileTavallProductIntelligenceStore(Path root, SnapshotCommitter snapshotCommitter) {
         this.root = Objects.requireNonNull(root, "root").toAbsolutePath().normalize();
+        this.snapshotCommitter = Objects.requireNonNull(snapshotCommitter, "snapshotCommitter");
     }
 
     @Override
-    public void record(TavallProductIntelligenceEntry entry) throws IOException {
-        Objects.requireNonNull(entry, "entry");
-        String entryId = requirePathIdentifier(entry.entryId(), "entryId");
-        String agentId = requirePathIdentifier(entry.agentId(), "agentId");
-        Path directory = directory(entry.productId(), agentId);
-        Files.createDirectories(directory);
-
-        Properties properties = new Properties();
-        encode(properties, "", entry);
-        Path target = directory.resolve(entryId + FILE_SUFFIX);
-        Path temporary = Files.createTempFile(directory, TEMP_FILE_PREFIX, ".tmp");
-        try {
-            writeProperties(temporary, properties);
-            moveAtomicallyWhenSupported(temporary, target);
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
-    }
-
-    @Override
-    public void recordAll(List<TavallProductIntelligenceEntry> entries) throws IOException {
-        Objects.requireNonNull(entries, "entries");
-        if (entries.isEmpty()) {
+    public void recordBatch(List<TavallProductIntelligenceEntry> entries) throws IOException {
+        List<TavallProductIntelligenceEntry> batch = entries == null ? List.of() : List.copyOf(entries);
+        if (batch.isEmpty()) {
             throw new IllegalArgumentException("entries must not be empty");
         }
 
-        List<TavallProductIntelligenceEntry> batch = List.copyOf(entries);
-        TavallProductIntelligenceEntry first = Objects.requireNonNull(batch.getFirst(), "entries entry");
+        TavallProductIntelligenceEntry first = Objects.requireNonNull(batch.getFirst(), "entries must not contain null");
         String productId = requireText(first.productId(), "productId");
         String agentId = requirePathIdentifier(first.agentId(), "agentId");
-        Set<String> entryIds = new LinkedHashSet<>();
 
         for (TavallProductIntelligenceEntry entry : batch) {
-            Objects.requireNonNull(entry, "entries entry");
-            if (!productId.equals(requireText(entry.productId(), "productId"))) {
-                throw new IllegalArgumentException("atomic intelligence batch must use one productId");
-            }
-            if (!agentId.equals(requirePathIdentifier(entry.agentId(), "agentId"))) {
-                throw new IllegalArgumentException("atomic intelligence batch must use one agentId");
-            }
-            String entryId = requirePathIdentifier(entry.entryId(), "entryId");
-            if (!entryIds.add(entryId)) {
-                throw new IllegalArgumentException("atomic intelligence batch contains duplicate entryId: " + entryId);
+            Objects.requireNonNull(entry, "entries must not contain null");
+            requirePathIdentifier(entry.entryId(), "entryId");
+            String scopedAgentId = requirePathIdentifier(entry.agentId(), "agentId");
+            if (!productId.equals(requireText(entry.productId(), "productId")) || !agentId.equals(scopedAgentId)) {
+                throw new IllegalArgumentException("All batch entries must share one productId and agentId");
             }
         }
 
         Path directory = directory(productId, agentId);
         Files.createDirectories(directory);
-        Properties properties = new Properties();
-        properties.setProperty("format", BATCH_FORMAT);
-        properties.setProperty("entry.count", Integer.toString(batch.size()));
-        for (int index = 0; index < batch.size(); index++) {
-            encode(properties, "entry." + index + ".", batch.get(index));
+
+        Map<String, TavallProductIntelligenceEntry> merged = new LinkedHashMap<>();
+        for (TavallProductIntelligenceEntry existing : load(productId, agentId)) {
+            merged.put(existing.entryId(), existing);
+        }
+        for (TavallProductIntelligenceEntry entry : batch) {
+            merged.put(entry.entryId(), entry);
         }
 
-        Path target = directory.resolve(batchFileName(productId, agentId, entryIds));
-        Path temporary = Files.createTempFile(directory, TEMP_FILE_PREFIX, ".tmp");
-        try {
-            writeProperties(temporary, properties);
-            moveBatchAtomically(temporary, target);
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
+        snapshotCommitter.commit(directory, directory.resolve(SNAPSHOT_FILE), encodeSnapshot(merged.values()));
     }
 
     @Override
@@ -118,48 +94,56 @@ public final class FileTavallProductIntelligenceStore implements TavallProductIn
             return List.of();
         }
 
-        List<Path> files;
-        try (Stream<Path> stream = Files.list(directory)) {
-            files = stream
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(FILE_SUFFIX))
-                    .sorted(Comparator.comparing(path -> path.getFileName().toString()))
-                    .toList();
-        }
+        Path snapshot = directory.resolve(SNAPSHOT_FILE);
+        List<TavallProductIntelligenceEntry> entries = Files.isRegularFile(snapshot)
+                ? decodeSnapshot(snapshot)
+                : loadLegacyEntries(directory);
 
-        Map<String, TavallProductIntelligenceEntry> entriesById = new LinkedHashMap<>();
-        for (Path file : files) {
-            for (TavallProductIntelligenceEntry entry : decodeAll(file)) {
-                if (!scopedProductId.equals(entry.productId()) || !scopedAgentId.equals(entry.agentId())) {
-                    throw new IOException("Persisted intelligence scope does not match requested product/agent");
-                }
-                TavallProductIntelligenceEntry previous = entriesById.get(entry.entryId());
-                if (previous == null || entry.recordedAt().isAfter(previous.recordedAt())) {
-                    entriesById.put(entry.entryId(), entry);
-                } else if (entry.recordedAt().equals(previous.recordedAt()) && !entry.equals(previous)) {
-                    throw new IOException("Conflicting intelligence entries share entryId: " + entry.entryId());
-                }
+        for (TavallProductIntelligenceEntry entry : entries) {
+            if (!scopedProductId.equals(entry.productId()) || !scopedAgentId.equals(entry.agentId())) {
+                throw new IOException("Persisted intelligence scope does not match requested product/agent");
             }
         }
-
-        List<TavallProductIntelligenceEntry> entries = new ArrayList<>(entriesById.values());
         entries.sort(Comparator
                 .comparing(TavallProductIntelligenceEntry::recordedAt)
                 .thenComparing(TavallProductIntelligenceEntry::entryId));
         return List.copyOf(entries);
     }
 
+    private List<TavallProductIntelligenceEntry> loadLegacyEntries(Path directory) throws IOException {
+        List<Path> files;
+        try (Stream<Path> stream = Files.list(directory)) {
+            files = stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(FILE_SUFFIX))
+                    .filter(path -> !path.getFileName().toString().equals(SNAPSHOT_FILE))
+                    .sorted(Comparator.comparing(path -> path.getFileName().toString()))
+                    .toList();
+        }
+
+        List<TavallProductIntelligenceEntry> entries = new ArrayList<>(files.size());
+        for (Path file : files) {
+            entries.add(decodeLegacyEntry(file));
+        }
+        return entries;
+    }
+
     private Path directory(String productId, String agentId) {
         return root.resolve(productHash(requireText(productId, "productId"))).resolve(agentId);
     }
 
-    private static void writeProperties(Path file, Properties properties) throws IOException {
-        try (Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-            properties.store(writer, null);
+    private static Properties encodeSnapshot(Collection<TavallProductIntelligenceEntry> entries) {
+        Properties properties = new Properties();
+        properties.setProperty("snapshot.version", SNAPSHOT_VERSION);
+        properties.setProperty("entry.count", Integer.toString(entries.size()));
+        int index = 0;
+        for (TavallProductIntelligenceEntry entry : entries) {
+            encodeEntry(properties, "entry." + index++ + ".", entry);
         }
+        return properties;
     }
 
-    private static void encode(Properties properties, String prefix, TavallProductIntelligenceEntry entry) {
+    private static void encodeEntry(Properties properties, String prefix, TavallProductIntelligenceEntry entry) {
         properties.setProperty(prefix + "entryId", entry.entryId());
         properties.setProperty(prefix + "productId", entry.productId());
         properties.setProperty(prefix + "agentId", entry.agentId());
@@ -171,35 +155,37 @@ public final class FileTavallProductIntelligenceStore implements TavallProductIn
         properties.setProperty(prefix + "recordedAt", entry.recordedAt().toString());
         properties.setProperty(prefix + "evidence.count", Integer.toString(entry.evidenceReferences().size()));
 
-        int index = 0;
+        int evidenceIndex = 0;
         for (String reference : entry.evidenceReferences()) {
-            properties.setProperty(prefix + "evidence." + index++, reference);
+            properties.setProperty(prefix + "evidence." + evidenceIndex++, reference);
         }
     }
 
-    private static List<TavallProductIntelligenceEntry> decodeAll(Path file) throws IOException {
-        Properties properties = new Properties();
-        try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            properties.load(reader);
+    private static List<TavallProductIntelligenceEntry> decodeSnapshot(Path file) throws IOException {
+        Properties properties = loadProperties(file);
+        if (!SNAPSHOT_VERSION.equals(requiredProperty(properties, "snapshot.version"))) {
+            throw new IOException("Unsupported product-intelligence snapshot version in " + file);
         }
 
-        if (!BATCH_FORMAT.equals(properties.getProperty("format"))) {
-            return List.of(decode(properties, "", file));
-        }
-
-        int entryCount = nonNegativeInteger(properties, "entry.count", file);
-        if (entryCount == 0) {
-            throw new IOException("Empty intelligence batch in " + file);
-        }
+        int entryCount = parseNonNegativeInt(properties, "entry.count", file);
         List<TavallProductIntelligenceEntry> entries = new ArrayList<>(entryCount);
+        Set<String> entryIds = new LinkedHashSet<>();
         for (int index = 0; index < entryCount; index++) {
-            entries.add(decode(properties, "entry." + index + ".", file));
+            TavallProductIntelligenceEntry entry = decodeEntry(properties, "entry." + index + ".", file);
+            if (!entryIds.add(entry.entryId())) {
+                throw new IOException("Duplicate entryId in product-intelligence snapshot: " + entry.entryId());
+            }
+            entries.add(entry);
         }
-        return List.copyOf(entries);
+        return entries;
     }
 
-    private static TavallProductIntelligenceEntry decode(Properties properties, String prefix, Path file) throws IOException {
-        int evidenceCount = nonNegativeInteger(properties, prefix + "evidence.count", file);
+    private static TavallProductIntelligenceEntry decodeLegacyEntry(Path file) throws IOException {
+        return decodeEntry(loadProperties(file), "", file);
+    }
+
+    private static TavallProductIntelligenceEntry decodeEntry(Properties properties, String prefix, Path file) throws IOException {
+        int evidenceCount = parseNonNegativeInt(properties, prefix + "evidence.count", file);
         Set<String> evidence = new LinkedHashSet<>();
         for (int index = 0; index < evidenceCount; index++) {
             evidence.add(requiredProperty(properties, prefix + "evidence." + index));
@@ -223,16 +209,25 @@ public final class FileTavallProductIntelligenceStore implements TavallProductIn
         }
     }
 
-    private static int nonNegativeInteger(Properties properties, String key, Path file) throws IOException {
+    private static Properties loadProperties(Path file) throws IOException {
+        Properties properties = new Properties();
+        try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            properties.load(reader);
+        }
+        return properties;
+    }
+
+    private static int parseNonNegativeInt(Properties properties, String key, Path file) throws IOException {
+        int value;
         try {
-            int value = Integer.parseInt(requiredProperty(properties, key));
-            if (value < 0) {
-                throw new IOException("Negative " + key + " in " + file);
-            }
-            return value;
+            value = Integer.parseInt(requiredProperty(properties, key));
         } catch (NumberFormatException exception) {
             throw new IOException("Invalid " + key + " in " + file, exception);
         }
+        if (value < 0) {
+            throw new IOException("Negative " + key + " in " + file);
+        }
+        return value;
     }
 
     private static String requiredProperty(Properties properties, String key) throws IOException {
@@ -243,6 +238,18 @@ public final class FileTavallProductIntelligenceStore implements TavallProductIn
         return value;
     }
 
+    private static void commitSnapshot(Path directory, Path target, Properties properties) throws IOException {
+        Path temporary = Files.createTempFile(directory, TEMP_FILE_PREFIX, ".tmp");
+        try {
+            try (Writer writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
+                properties.store(writer, null);
+            }
+            moveAtomicallyWhenSupported(temporary, target);
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
     private static void moveAtomicallyWhenSupported(Path source, Path target) throws IOException {
         try {
             Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
@@ -251,27 +258,10 @@ public final class FileTavallProductIntelligenceStore implements TavallProductIn
         }
     }
 
-    private static void moveBatchAtomically(Path source, Path target) throws IOException {
-        try {
-            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (AtomicMoveNotSupportedException exception) {
-            throw new IOException("Atomic filesystem move is required for multi-entry intelligence decisions", exception);
-        }
-    }
-
-    private static String batchFileName(String productId, String agentId, Set<String> entryIds) {
-        String material = productId + "\u0000" + agentId + "\u0000" + String.join("\u0000", entryIds.stream().sorted().toList());
-        return "batch-" + sha256(material) + FILE_SUFFIX;
-    }
-
     private static String productHash(String productId) {
-        return sha256(productId);
-    }
-
-    private static String sha256(String value) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
-                    .digest(value.getBytes(StandardCharsets.UTF_8));
+                    .digest(productId.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 must be available", exception);
@@ -294,5 +284,10 @@ public final class FileTavallProductIntelligenceStore implements TavallProductIn
             throw new IllegalArgumentException(fieldName + " must not be blank");
         }
         return value.trim();
+    }
+
+    @FunctionalInterface
+    interface SnapshotCommitter {
+        void commit(Path directory, Path target, Properties properties) throws IOException;
     }
 }

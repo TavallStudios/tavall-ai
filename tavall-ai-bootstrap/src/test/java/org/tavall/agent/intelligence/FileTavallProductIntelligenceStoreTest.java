@@ -3,6 +3,7 @@ package org.tavall.agent.intelligence;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -29,49 +30,6 @@ class FileTavallProductIntelligenceStoreTest {
         assertEquals(List.of(entry), reopened.load("project/novus web", "web"));
         assertEquals(List.of(), reopened.load("tavall-pvp", "web"));
         assertFalse(Files.exists(root.resolve("project/novus web")), "product ids must never become raw paths");
-    }
-
-    @Test
-    void persistsAtomicBatchAcrossStoreInstances(@TempDir Path root) throws Exception {
-        TavallProductIntelligenceEntry accepted = entry(
-                "accepted-home",
-                "project-novus",
-                "web",
-                TavallProductIntelligenceDisposition.ACCEPTED
-        );
-        TavallProductIntelligenceEntry rejected = entry(
-                "rejected-home",
-                "project-novus",
-                "web",
-                TavallProductIntelligenceDisposition.REJECTED
-        );
-        FileTavallProductIntelligenceStore store = new FileTavallProductIntelligenceStore(root);
-
-        store.recordAll(List.of(accepted, rejected));
-
-        assertEquals(List.of(accepted, rejected), new FileTavallProductIntelligenceStore(root)
-                .load("project-novus", "web"));
-    }
-
-    @Test
-    void invalidAtomicBatchLeavesNoEarlierEntryVisible(@TempDir Path root) throws Exception {
-        TavallProductIntelligenceEntry valid = entry(
-                "accepted-home",
-                "project-novus",
-                "web",
-                TavallProductIntelligenceDisposition.ACCEPTED
-        );
-        TavallProductIntelligenceEntry invalid = entry(
-                "rejected-home",
-                "project-novus",
-                "..",
-                TavallProductIntelligenceDisposition.REJECTED
-        );
-        FileTavallProductIntelligenceStore store = new FileTavallProductIntelligenceStore(root);
-
-        assertThrows(IllegalArgumentException.class, () -> store.recordAll(List.of(valid, invalid)));
-
-        assertEquals(List.of(), store.load("project-novus", "web"));
     }
 
     @Test
@@ -102,6 +60,56 @@ class FileTavallProductIntelligenceStoreTest {
     }
 
     @Test
+    void recordsBatchAsOneVisibleSnapshot(@TempDir Path root) throws Exception {
+        FileTavallProductIntelligenceStore store = new FileTavallProductIntelligenceStore(root);
+        TavallProductIntelligenceEntry accepted = entry("decision-a", "project-novus", "web", TavallProductIntelligenceDisposition.ACCEPTED);
+        TavallProductIntelligenceEntry rejected = entry("decision-b", "project-novus", "web", TavallProductIntelligenceDisposition.REJECTED);
+
+        store.recordBatch(List.of(accepted, rejected));
+
+        assertEquals(List.of(accepted, rejected), store.load("project-novus", "web"));
+    }
+
+    @Test
+    void failedBatchLeavesPreviousSnapshotVisible(@TempDir Path root) throws Exception {
+        TavallProductIntelligenceEntry existing = entry("existing", "project-novus", "web", TavallProductIntelligenceDisposition.REFERENCE);
+        new FileTavallProductIntelligenceStore(root).record(existing);
+
+        FileTavallProductIntelligenceStore interrupted = new FileTavallProductIntelligenceStore(
+                root,
+                (directory, target, properties) -> {
+                    Files.writeString(directory.resolve("interrupted-write.tmp"), properties.toString());
+                    throw new IOException("injected interruption before atomic commit");
+                }
+        );
+
+        assertThrows(IOException.class, () -> interrupted.recordBatch(List.of(
+                entry("decision-a", "project-novus", "web", TavallProductIntelligenceDisposition.ACCEPTED),
+                entry("decision-b", "project-novus", "web", TavallProductIntelligenceDisposition.REJECTED)
+        )));
+
+        assertEquals(
+                List.of(existing),
+                new FileTavallProductIntelligenceStore(root).load("project-novus", "web"),
+                "a failed batch must not expose a partial replacement"
+        );
+    }
+
+    @Test
+    void batchRequiresOneProductAndAgentScope(@TempDir Path root) {
+        FileTavallProductIntelligenceStore store = new FileTavallProductIntelligenceStore(root);
+
+        assertThrows(IllegalArgumentException.class, () -> store.recordBatch(List.of(
+                entry("one", "project-novus", "web", TavallProductIntelligenceDisposition.REFERENCE),
+                entry("two", "tavall-pvp", "web", TavallProductIntelligenceDisposition.REFERENCE)
+        )));
+        assertThrows(IllegalArgumentException.class, () -> store.recordBatch(List.of(
+                entry("one", "project-novus", "web", TavallProductIntelligenceDisposition.REFERENCE),
+                entry("two", "project-novus", "builder", TavallProductIntelligenceDisposition.REFERENCE)
+        )));
+    }
+
+    @Test
     void rejectsUnsafeFilesystemIdentifiers(@TempDir Path root) {
         FileTavallProductIntelligenceStore store = new FileTavallProductIntelligenceStore(root);
 
@@ -124,24 +132,9 @@ class FileTavallProductIntelligenceStoreTest {
     void rejectsDotOnlyEntryAndAgentIdentifiers(@TempDir Path root) {
         FileTavallProductIntelligenceStore store = new FileTavallProductIntelligenceStore(root);
 
-        assertThrows(IllegalArgumentException.class, () -> store.record(entry(
-                ".",
-                "project-novus",
-                "web",
-                TavallProductIntelligenceDisposition.REFERENCE
-        )));
-        assertThrows(IllegalArgumentException.class, () -> store.record(entry(
-                "safe-entry",
-                "project-novus",
-                ".",
-                TavallProductIntelligenceDisposition.REFERENCE
-        )));
-        assertThrows(IllegalArgumentException.class, () -> store.record(entry(
-                "safe-entry",
-                "project-novus",
-                "..",
-                TavallProductIntelligenceDisposition.REFERENCE
-        )));
+        assertThrows(IllegalArgumentException.class, () -> store.record(entry(".", "project-novus", "web", TavallProductIntelligenceDisposition.REFERENCE)));
+        assertThrows(IllegalArgumentException.class, () -> store.record(entry("safe-entry", "project-novus", ".", TavallProductIntelligenceDisposition.REFERENCE)));
+        assertThrows(IllegalArgumentException.class, () -> store.record(entry("safe-entry", "project-novus", "..", TavallProductIntelligenceDisposition.REFERENCE)));
         assertThrows(IllegalArgumentException.class, () -> store.load("project-novus", "."));
         assertThrows(IllegalArgumentException.class, () -> store.load("project-novus", ".."));
     }
