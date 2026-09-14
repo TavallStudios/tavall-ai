@@ -11,16 +11,15 @@ include(
     "tavall-agent-architecture",
     "tavall-agent-documentation",
     "tavall-agent-builder",
+    "tavall-ai-runtime-model-execution",
+    "tavall-ai-runtime-codex",
     "tavall-ai-runtime-distributed-execution",
     "tavall-ai-runtime",
 )
 
 sourceControl {
     gitRepository(uri("https://github.com/TavallStudios/function-catalog.git")) {
-        // Transitional ownership. agent-runtime and codex-agent-provider move into Tavall AI in a
-        // stacked migration; Function Catalog will retain only callable-function/MCP infrastructure.
+        // Function Catalog owns callable-function/schema/view/MCP infrastructure only.
         producesModule("org.tavall:ai-core")
-        producesModule("org.tavall:agent-runtime")
-        producesModule("org.tavall:codex-agent-provider")
     }
 }
