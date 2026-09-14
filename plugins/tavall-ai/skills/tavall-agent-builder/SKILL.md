@@ -1,34 +1,40 @@
 ---
 name: tavall-agent-builder
-description: Compose Tavall Builder behavior around the existing Project Novus Minecraft Builder platform, including deterministic Builder Studio simulation, without embedding an AI/model runtime or duplicating Builder implementation.
+description: Coordinate Tavall Builder/Minecraft build work around the authoritative Project Novus Builder platform, including concept generation, deterministic Builder Studio evidence, visual critique, semantic repair, and explicit live certification.
 ---
 
 # Tavall Builder Agent
 
-Use this agent for Tavall Builder jobs. The agent contains no AI/model runtime and is not a production Minecraft gameplay runtime. The parent Tavall AI runtime supplies model execution and required runtime capabilities.
+Use this coordinator for Tavall Builder jobs. It does not own Minecraft geometry, palettes, schematic formats, simulation, rendering, or a second AI runtime.
 
 ## Authoritative Builder implementation
 
-When Project Novus Builder sources are present, treat `minecraft-bot-builder` and `minecraft-bot-builder/skills/minecraft-builder/` as authoritative for Minecraft building behavior.
+When Project Novus Builder sources are present, treat `minecraft-bot-builder` and `minecraft-bot-builder/skills/minecraft-builder/` as authoritative. Do not duplicate BuildSpec logic, palettes, schematic serialization, world-vision/mock/replay logic, Builder Studio rendering, FAWE placement, Mineflayer traversal, verification agents, or repair-learning logic inside Tavall AI.
 
-Do not copy palettes, block knowledge, BuildSpec logic, schematic serialization, mock/replay logic, Prismarine/Studio rendering, FAWE placement, Mineflayer traversal, or world-foundry implementation into Tavall AI.
+## Default orchestration
 
-## Builder behaviors
+For a new build or substantial redesign, preserve the authoritative Builder flow when available:
 
-Compose Planner, Terrain, Architecture, Detail, Repair, and Visual Critic behavior as needed. Generic Tavall implementation/review/reconciliation/E2E agents may coordinate around Builder work without becoming separate model runtimes.
+`intent/references/constraints -> Builder context/palette -> concept generation -> inert BuildSpec -> deterministic compile/mock/world-vision validation -> Builder Studio evidence -> visual/gameplay critique -> bounded semantic repair -> re-render/re-verify -> live certification when required`
 
-## Model calls
+Planner, Terrain, Architecture, Detail, Repair, and Visual Critic behaviors may enrich constraints and repairs, but should not replace the authoritative Builder contract with an improvised parallel pipeline.
 
-Use the parent runtime's `distributed-execution` capability for genuinely model-shaped planning, multimodal critique, or repair calls. Keep deterministic Builder compilation/validation local when it does not need another model call.
+## Model and deterministic work
 
-## Builder Studio simulation
+Use the parent runtime/distributed-execution surface only for genuinely model-shaped planning, critique, or semantic repair. Keep deterministic voxel execution, lowering, compilation, validation, replay, artifact generation, and verification local to the owning Builder implementation.
 
-When the runtime grants Builder Studio execution, use typed `BuilderStudioSimulationRequest` values and the authorized `BuilderStudioSimulationRunner` boundary. Artifact/evidence paths must stay inside the authorized Builder workspace; allowed playback speeds are `0.25`, `1`, `4`, `16`, `64`.
+Preserve concept/source provenance, seed, palette, constraints, artifact identity, and evidence across repair iterations. Repairs should modify the accepted source, not silently replace it with an unrelated build.
 
-Use deterministic Studio simulation for replay/visual iteration and preserve returned session/status/evidence references. Never construct arbitrary shell fragments or infer executable authority. Evidence mode does not imply screenshots/video exist unless the Studio implementation actually produced and verified them.
+## Review and simulation
 
-Prefer replay/mock simulation for iteration. Live Paper + FAWE + Mineflayer remains a later certification boundary where required.
+Visual review should cover recognizability, true 3D structure, prompt fidelity, scale/proportion, detail, composition, gameplay readability, traversal, encounter fairness, palette cohesion, world context, performance/density, and production validity.
 
-## Authority
+When Builder Studio execution is authorized, use typed simulation requests and keep artifacts/evidence inside the authorized environment component. Prefer deterministic Studio/replay evidence for iteration. Generated images, imagined screenshots, or prose-only visual claims are not Builder evidence.
 
-Tavall Cloud/runtime host remains authoritative for workspace, process/network, executable/credential, and target-mutation grants. Builder Studio simulation never grants production-world mutation authority.
+Live Paper + FAWE + Mineflayer remains a later certification boundary when the owning Builder workflow requires it.
+
+## Source/environment identity
+
+For substantive Builder engineering, bind the exact multi-repository source snapshot to the Tavall lane/environment generation used for implementation and acceptance. If a participating source head changes materially, prior environment validation becomes historical and the matching generation/evidence must be refreshed.
+
+Tavall Cloud/runtime host remains authoritative for source snapshots, workspace/process/network, executable/credential, environment components, and target mutation. Builder Studio never grants production-world authority.

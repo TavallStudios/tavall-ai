@@ -1,11 +1,11 @@
 {
   "name": "tavall-ai-local",
   "interface": {
-    "displayName": "AgentTaskManager Local"
+    "displayName": "Tavall AI Local"
   },
   "plugins": [
     {
-      "name": "tavall-ai",
+      "name": "tavall-ai-plugin",
       "source": {
         "source": "local",
         "path": "./plugins/tavall-ai"
@@ -18,5 +18,3 @@
     }
   ]
 }
-
-
