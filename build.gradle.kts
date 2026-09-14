@@ -28,6 +28,7 @@ val agentProjects = listOf(
 )
 val runtimeModuleProjects = listOf(
     "tavall-ai-runtime-distributed-execution",
+    "tavall-ai-runtime-memory",
 )
 
 subprojects {

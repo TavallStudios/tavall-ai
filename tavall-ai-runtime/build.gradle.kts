@@ -9,6 +9,7 @@ application {
 dependencies {
     implementation(project(":tavall-ai-bootstrap"))
     implementation(project(":tavall-ai-runtime-distributed-execution"))
+    implementation(project(":tavall-ai-runtime-memory"))
 
     runtimeOnly(project(":tavall-agent-scheduler"))
     runtimeOnly(project(":tavall-agent-orchestration"))

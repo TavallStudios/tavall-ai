@@ -16,6 +16,7 @@ include(
     "tavall-ai-runtime-model-execution",
     "tavall-ai-runtime-codex",
     "tavall-ai-runtime-distributed-execution",
+    "tavall-ai-runtime-memory",
     "tavall-ai-runtime",
 )
 
