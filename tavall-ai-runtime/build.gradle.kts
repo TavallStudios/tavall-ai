@@ -21,6 +21,7 @@ dependencies {
     runtimeOnly(project(":tavall-agent-documentation"))
     runtimeOnly(project(":tavall-agent-builder"))
     runtimeOnly(project(":tavall-agent-recovery"))
+    runtimeOnly(project(":tavall-agent-web"))
 
     implementation(project(":tavall-ai-runtime-model-execution"))
     runtimeOnly(project(":tavall-ai-runtime-codex"))

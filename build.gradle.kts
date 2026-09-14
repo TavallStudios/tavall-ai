@@ -25,6 +25,7 @@ val agentProjects = listOf(
     "tavall-agent-documentation",
     "tavall-agent-builder",
     "tavall-agent-recovery",
+    "tavall-agent-web",
 )
 val runtimeModuleProjects = listOf(
     "tavall-ai-runtime-distributed-execution",

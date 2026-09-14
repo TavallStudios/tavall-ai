@@ -12,6 +12,7 @@ include(
     "tavall-agent-documentation",
     "tavall-agent-builder",
     "tavall-agent-recovery",
+    "tavall-agent-web",
     "tavall-ai-runtime-project-context",
     "tavall-ai-runtime-model-execution",
     "tavall-ai-runtime-codex",
