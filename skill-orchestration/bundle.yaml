@@ -1,14 +1,18 @@
-name: tavall-skill-orchestration-bundle
-version: 0.2.0
+name: tavall-ai-plugin
+version: 0.4.0
 entrypoint: tavall-skill-orchestrator
+package_root: plugins/tavall-ai
 components:
   - tavall-skill-orchestrator
   - tavall-git-workflow
-external_foundations:
+  - tavall-staging-pr-workflow
+  - tavall-staging-reconciliation
+  - tavall-staging-promotion
+  - tavall-documentation-context
+  - tavall-engineering-policy
   - tavall-memory-plane
-integrates:
-  - tavall-ai
-  - agent-task-manager
+  - tavall-local-ci
+agents:
   - tavall-agent-orchestration
   - tavall-agent-implementation
   - tavall-agent-review
@@ -17,19 +21,16 @@ integrates:
   - tavall-agent-architecture
   - tavall-agent-documentation
   - tavall-agent-scheduler
+  - tavall-agent-recovery
   - tavall-agent-builder
+  - tavall-agent-web
+runtime_specialists:
   - tavall-ai-distributed-execution
-  - minecraft-builder
-  - rendering-builder-replays
-  - builder-studio
-  - tavall-web-agent
-  - impeccable
-  - tavall-java-tools
+  - agent-task-manager
+capability_domains:
   - tavall-cloud
-conditional_completion:
-  - tavall-local-ci
-supporting_capabilities:
   - tavall-ai-function-catalog
-  - tavall-ai-interface
-  - tavall-ai-codex
-  - tavall-ai-workflow
+  - minecraft-builder
+  - builder-studio
+  - browser-design
+installable_plugin_count: 1
